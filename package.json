@@ -1,0 +1,9 @@
+{
+  "name": "paymeback",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 8765 --directory docs"
+  }
+}

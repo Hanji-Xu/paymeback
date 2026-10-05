@@ -1,0 +1,1598 @@
+/* Pay Me Back. One stylesheet, no dependencies, no images, no web fonts.
+   Two colours and one grey. Type sizes: 10, 12, 24, 56 px (phones: 12, 14, 24, 56). Weights: 400, 700.
+   Every structural edge is a 1px ink line. Rows of cells are grids with a 1px gap over an ink
+   background, so two cells can never draw a doubled line. Each page section draws only its
+   bottom edge. See COMPONENTS.md for the markup these rules expect. */
+
+/* ---------- 1. Tokens ---------- */
+
+:root,
+::backdrop {
+  --ink: #000;
+  --paper: #fff;
+  --mute: #767676;
+}
+
+:root {
+  --pad: 20px;          /* side padding of every cell */
+  --row: 40px;          /* height of header-like rows, buttons and inputs */
+  --bar: 40px;          /* height of the fixed header */
+  --fs: 12px;
+  --fs-small: 10px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root,
+  ::backdrop {
+    --ink: #fff;
+    --paper: #000;
+    --mute: #8e8e8e;
+  }
+
+  :root { color-scheme: dark; }
+}
+
+/* ---------- 2. Base ---------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar) + var(--notice, 0px));   /* --notice: height of a sticking notice bar, set by app.js */
+  scrollbar-gutter: stable;
+}
+
+/* The page behind an open dialog does not scroll. */
+html:has(dialog:modal) { overflow: hidden; }
+
+body {
+  margin: 0;
+  padding-top: var(--bar);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--fs)/1.4 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure { margin: 0; padding: 0; }
+h1, h2, h3, h4 { font-size: inherit; font-weight: 700; }
+ul, ol { list-style: none; }
+b, strong { font-weight: 700; }
+a { color: inherit; }
+svg { display: block; }
+table { border-collapse: collapse; border-spacing: 0; }
+th { font-weight: inherit; text-align: left; }
+
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  border-radius: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+/* A bare button is an uppercase text label. The solid kind is .btn. */
+button {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+button:disabled { color: var(--mute); cursor: default; }
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+::selection { background: var(--ink); color: var(--paper); }
+::placeholder { color: var(--mute); opacity: 1; }
+
+/* ---------- 3. Type helpers ---------- */
+
+.title {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Title followed by a short drawn dash, as on the link cards. */
+.title--dash { display: flex; align-items: center; min-width: 0; }
+
+.title--dash::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 1px;
+  margin-left: 6px;
+  background: currentColor;
+}
+
+.eyebrow {
+  font-size: var(--fs-small);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.small { font-size: var(--fs-small); }
+.mute { color: var(--mute); }
+
+.num,
+.amt { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.who { font-weight: 700; }
+
+/* The bold word in front of a line: OK, FIX, NEW PERSON. FIX is a solid block, not a colour. */
+.tag {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tag--fix { padding: 0 4px; background: var(--ink); color: var(--paper); }
+
+/* A bold word plus a sentence on one baseline. */
+.say { display: flex; align-items: baseline; gap: 8px; }
+.say > :last-child { min-width: 0; }
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Keeps a label the same width when it turns bold: put the label text in data-text too. */
+[data-text] {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-text]::after {
+  content: attr(data-text);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- 4. Links and buttons ---------- */
+
+/* Text link: a 1px underline that shrinks to nothing on hover. One line only. */
+.link {
+  position: relative;
+  display: inline-block;
+  justify-self: start;
+  max-width: 100%;
+  line-height: 1.4;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+
+.link:disabled { cursor: default; }
+.link:disabled::after { width: 0; }
+
+@media (hover: hover) {
+  .link:hover::after { width: 0; }
+}
+
+/* Links inside running text can wrap, so they use a plain underline that goes away on hover. */
+.block a,
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .block a:hover,
+  .prose a:hover { text-decoration-color: transparent; }
+}
+
+/* The solid block. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--row);
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn--wide { width: 100%; }
+
+.btn:disabled { background: var(--paper); color: var(--mute); }
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+}
+
+/* Close button: two drawn hairlines. */
+.x { position: relative; flex: none; width: var(--row); min-height: var(--row); }
+
+.x::before,
+.x::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 1px;
+  margin-left: -6.5px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.x::after { transform: rotate(-45deg); }
+
+/* A header-like cell used for rows of buttons. */
+.cell,
+.strip__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: var(--row);
+  padding: 0 20px;
+  background: var(--paper);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cell:focus-visible,
+.strip__cell:focus-visible,
+.strip__cell :focus-visible { outline-offset: -2px; }
+
+.cell--grow { flex: 1; }
+
+.cell--solid,
+.strip__cell--solid {
+  background: var(--ink);
+  color: var(--paper);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cell--solid:focus-visible,
+.strip__cell--solid:focus-visible { outline-color: var(--paper); }
+
+.cell--solid:disabled { background: var(--paper); color: var(--mute); }
+
+@media (hover: hover) {
+  .cell--solid:hover:not(:disabled),
+  .strip__cell--solid:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+}
+
+/* ---------- 5. Form controls ---------- */
+
+input:not([type="checkbox"], [type="radio"]),
+select,
+textarea {
+  display: block;
+  width: 100%;
+  min-height: var(--row);
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+textarea { padding: 10px; line-height: 1.4; resize: vertical; }
+
+input:disabled,
+select:disabled,
+textarea:disabled { border-color: var(--mute); color: var(--mute); }
+
+input[readonly] { text-overflow: ellipsis; }
+
+/* The select arrow is a small drawn triangle in ink, so it follows the colour scheme. */
+select {
+  padding-right: 26px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 10px) 50%;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  padding: 3px;
+  border: 1px solid var(--ink);
+  background: transparent content-box;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* The one round thing besides the people in the graph. */
+input[type="radio"] { border-radius: 50%; }
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked { background-color: var(--ink); }
+
+/* Label above a control. */
+.field { display: grid; gap: 6px; min-width: 0; }
+
+.field__label {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Checkbox or radio with its words. */
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+
+/* A row of text buttons where one or more are on: on is bold and underlined. */
+.modes { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+
+.modes button[aria-pressed="true"],
+.strip__modes button[aria-pressed="true"],
+.item__who button[aria-pressed="true"] {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- 6. Header ---------- */
+
+.skip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  text-transform: uppercase;
+  transform: translateY(-200%);
+}
+
+.skip:focus { transform: none; }
+
+.bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 1px;
+  height: var(--bar);
+  border-bottom: 1px solid var(--ink);
+  background: var(--ink);
+}
+
+.bar__brand {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pad);
+  background: var(--paper);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.bar__rest {
+  grid-column: span 2;
+  display: flex;
+  min-width: 0;
+  background: var(--paper);
+}
+
+.bar__nav {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--paper);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bar__nav::-webkit-scrollbar { display: none; }
+
+.bar__nav a {
+  flex: none;
+  height: 100%;
+  margin-left: 36px;
+  padding: 0 10px;
+  text-decoration: none;
+}
+
+.bar__nav a:first-child { margin-left: 30px; }
+
+.bar__nav a.is-current { font-weight: 700; }
+
+.bar__cell {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 140px;
+  border-left: 1px solid var(--ink);
+  background: var(--paper);
+  white-space: nowrap;
+}
+
+.bar a:focus-visible,
+.bar button:focus-visible { outline-offset: -2px; }
+
+/* ---------- 7. Notice bar and status line ---------- */
+
+.notice {
+  position: sticky;
+  top: var(--bar);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 36px;
+  min-height: var(--row);
+  padding: 11px var(--pad);
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+/* A line that needs no answer scrolls away with the page. */
+.notice--flow { position: static; }
+
+.notice__text { flex: 1 1 280px; min-width: 0; }
+.notice__text .tag { margin-right: 6px; }
+.notice__actions { display: flex; flex-wrap: wrap; gap: 8px 36px; }
+
+/* Undo line. Fixed to the bottom of the screen, ink on paper reversed so it is noticed. */
+.status {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  min-height: var(--row);
+  background: var(--ink);
+  color: var(--paper);
+  transition: transform 0.2s ease;
+}
+
+@starting-style {
+  .status { transform: translateY(100%); }
+}
+
+.status__text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 8px var(--pad);
+}
+
+.status__btn {
+  flex: none;
+  min-width: 140px;
+  padding: 0 var(--pad);
+  border-left: 1px solid var(--paper);
+  text-align: center;
+}
+
+.status :focus-visible { outline-color: var(--paper); outline-offset: -4px; }
+
+/* While a dialog is open the line is moved into it (app.js). There it is the dialog's last row, so it
+   never covers the dialog's own buttons. It does not slide in: that would make the dialog scroll for a moment. */
+dialog > .status { position: static; flex: none; transform: none; transition: none; }
+
+/* ---------- 8. Sections, text blocks, bands ---------- */
+
+.block,
+.band,
+.statement,
+.foot { border-bottom: 1px solid var(--ink); }
+
+/* Text block: a narrow column, centred, with air above and below. */
+.block { padding: 80px var(--pad); }
+.block__col { max-width: 480px; margin: 0 auto; }
+.block .title { margin-bottom: 20px; }
+.block p + p { margin-top: 16px; }
+
+@media (min-width: 1024px) {
+  .block__col { max-width: 640px; }
+}
+
+/* Label on the left, sentence on the right. */
+.pairs { display: grid; gap: 16px; }
+.block p + .pairs,
+.block .pairs + p { margin-top: 16px; }
+.pairs > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px; }
+.pairs dt { font-weight: 700; }
+
+/* Band: full width, rows stacked with one hairline between them. */
+.band > :where(:not([hidden])) ~ :where(:not([hidden])) { border-top: 1px solid var(--ink); }
+
+/* Head row of a band, split like the header. */
+.head {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ink);
+}
+
+.head__cell {
+  display: flex;
+  align-items: center;
+  gap: 4px 20px;
+  min-width: 0;
+  min-height: var(--row);
+  padding: 6px var(--pad);
+  background: var(--paper);
+}
+
+.head > .head__cell:nth-child(2) { grid-column: span 2; }
+.head__note { min-width: 0; color: var(--mute); }
+.head__cell > .title + .head__note { margin-left: auto; text-align: right; }
+
+/* Row of text links under a table. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 36px;
+  min-height: var(--row);
+  padding: 11px var(--pad);
+}
+
+.empty { padding: 20px var(--pad); color: var(--mute); }
+
+/* ---------- 9. Write it down ---------- */
+
+.write {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ink);
+}
+
+.write > * { min-width: 0; }
+.write__cell { display: flex; flex-direction: column; background: var(--paper); }
+
+.write__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px 20px;
+  min-height: var(--row);
+  padding: 0 var(--pad);
+  border-bottom: 1px solid var(--ink);
+}
+
+.write__head .head__note { margin-left: auto; }
+
+.write .write__input {
+  flex: 1;
+  min-height: 328px;
+  padding: 20px var(--pad);
+  border: 0;
+  line-height: 2;
+  resize: none;
+  field-sizing: content;
+}
+
+.write__input:focus-visible { outline-offset: -2px; }
+
+.write__read { padding: 20px var(--pad); }
+
+/* One row per typed line. A single-line row is 24px tall, the same as a line in the box. */
+.reading { display: grid; gap: 7.2px; padding: 3.6px 0; }
+.reading:empty { display: none; }
+.reading:not(:empty) + .reading__hint { display: none; }
+
+.reading__row {
+  display: grid;
+  grid-template-columns: 2.4em 3.4em minmax(0, 1fr);
+  align-items: baseline;
+}
+
+.reading__row > .tag { justify-self: start; }
+.reading__n { color: var(--mute); font-variant-numeric: tabular-nums; }
+.reading__body { display: grid; gap: 2px; min-width: 0; }
+.reading__src { color: var(--mute); white-space: pre-wrap; }
+.reading__body .tag { margin-right: 6px; }
+.reading__hint { padding: 3.6px 0; color: var(--mute); }
+
+.write .write__go { width: 100%; min-height: 48px; border: 0; }
+.write__go:focus-visible { outline-offset: -4px; outline-color: var(--paper); }
+.write__go:disabled:focus-visible { outline-color: var(--ink); }
+
+.write__sum {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px var(--pad);
+  background: var(--paper);
+}
+
+/* "What you can write": a row that opens. */
+.more__sum {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--row);
+  padding: 0 calc(var(--pad) + 24px) 0 var(--pad);
+  list-style: none;
+  cursor: pointer;
+}
+
+.more__sum::-webkit-details-marker { display: none; }
+.more__sum:focus-visible { outline-offset: -2px; }
+
+.more__sum::before,
+.more__sum::after {
+  content: "";
+  position: absolute;
+  right: var(--pad);
+  top: 50%;
+  width: 9px;
+  height: 1px;
+  background: currentColor;
+}
+
+.more__sum::before { transform: rotate(90deg); }
+.more[open] > .more__sum::before { display: none; }
+
+.examples > li { border-top: 1px solid var(--ink); }
+
+.example {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1px;
+  width: 100%;
+  text-transform: none;
+}
+
+.example:focus-visible { outline-offset: -2px; }
+.example > span { padding: 11px var(--pad); }
+
+.example__line {
+  white-space: pre-wrap;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.example__note { color: var(--mute); }
+
+@media (hover: hover) {
+  .example:hover .example__line { text-decoration-color: transparent; }
+}
+
+/* ---------- 10. Tables ---------- */
+
+.table { width: 100%; table-layout: fixed; }
+
+.table th,
+.table td {
+  padding: 11px var(--pad);
+  vertical-align: top;
+  text-align: left;
+}
+
+.table thead th {
+  padding-top: 13px;
+  padding-bottom: 13px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.table th:first-child,
+.table td:first-child { width: 33.333%; }
+
+.table tbody tr { border-top: 1px solid var(--ink); }
+.table .num { text-align: right; }
+
+/* Bills */
+.bill { cursor: pointer; }
+
+.bill__open {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.bill__open::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+
+@media (hover: hover) {
+  .bill:hover .bill__open::after { width: 0; }
+}
+
+.bill__amt { font-variant-numeric: tabular-nums; }
+.bill__conv { display: block; color: var(--mute); }
+.bill.is-dim { color: var(--mute); }
+
+/* Exchange rates (in the group drawer) */
+.rates { width: 100%; }
+
+.rates th,
+.rates td { padding: 8px 10px 8px 0; vertical-align: middle; text-align: left; }
+
+.rates th:last-child,
+.rates td:last-child { width: 96px; padding-right: 0; }
+
+.rates thead th {
+  padding-top: 0;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.rates tbody tr { border-top: 1px solid var(--ink); }
+.rates tbody th { font-weight: 700; }
+.rates__src { display: block; font-size: var(--fs-small); color: var(--mute); }
+.rates input:not([type="checkbox"], [type="radio"]) { min-height: 30px; text-align: right; }
+
+/* ---------- 11. Graph ---------- */
+
+/* Phase links: plain labels, the current one bold. */
+.head__cell.phases {
+  gap: 0;
+  align-items: stretch;
+  padding: 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.phases::-webkit-scrollbar { display: none; }
+.phase { flex: none; padding: 0 10px; white-space: nowrap; }
+.phase:focus-visible { outline-offset: -2px; }
+.phase.is-current { font-weight: 700; }
+.phase.is-empty { color: var(--mute); }
+
+/* The band around the drawing. Classes inside the svg are styled elsewhere. */
+.graph { position: relative; overflow: hidden; background: var(--paper); }
+
+.graph__svg {
+  width: 100%;
+  height: auto;
+  max-height: min(72vh, 680px);
+  margin: 0 auto;
+}
+
+.graph__hint {
+  position: absolute;
+  left: var(--pad);
+  top: 12px;
+  max-width: 220px;
+  font-size: var(--fs-small);
+  color: var(--mute);
+  pointer-events: none;
+}
+
+/* Control strip: twelve columns, so its first four cells end on the header's first line. */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ink);
+}
+
+.strip__cell { padding: 0 10px; font-variant-numeric: tabular-nums; }
+.strip__cell--2 { grid-column: span 2; }
+.strip__cell--4 { grid-column: span 4; }
+.strip__label { color: var(--mute); }
+
+.strip select {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  height: 100%;
+  padding: 0 16px 0 0;
+  border: 0;
+  background-color: transparent;
+  background-position: calc(100% - 4px) 50%, 100% 50%;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+}
+
+.strip__modes { gap: 0; }
+.strip__modes button { height: 100%; padding: 0 10px; white-space: nowrap; }
+
+/* What happens in this step. */
+.narration { min-height: 132px; }
+.narration .eyebrow { margin-bottom: 8px; }
+.narration .say { margin-top: 16px; }
+
+.trail { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ink); }
+.trail__list { margin-top: 12px; }
+
+.trail__step {
+  display: grid;
+  grid-template-columns: 2.4em minmax(0, 1fr);
+  width: 100%;
+  padding: 3px 0;
+  text-transform: none;
+}
+
+.trail__n { color: var(--mute); font-variant-numeric: tabular-nums; }
+.trail__step.is-current { font-weight: 700; }
+
+/* ---------- 12. Breakdown ---------- */
+
+/* Which bills an amount comes from. Used floating over the graph and inside settle cards. */
+.breakdown { display: grid; gap: 10px; text-align: left; }
+
+.breakdown__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-weight: 700;
+}
+
+.breakdown__rows { display: grid; gap: 8px; }
+
+.breakdown__row {
+  display: grid;
+  grid-template-columns: 6.2em minmax(0, 1fr);
+  column-gap: 12px;
+}
+
+.breakdown__amt { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.breakdown__via { display: block; color: var(--mute); }
+.breakdown__note { padding-top: 10px; border-top: 1px solid var(--ink); color: var(--mute); }
+
+.breakdown--float {
+  position: absolute;
+  z-index: 5;
+  width: min(340px, calc(100% - 16px));
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  padding: 16px var(--pad);
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.breakdown--float .breakdown__head { padding-right: 24px; }
+
+.breakdown__close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+}
+
+/* ---------- 13. Statement and settle cards ---------- */
+
+.statement {
+  padding: 90px var(--pad);
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.statement p:empty::before { content: "\00a0"; }
+
+/* Three cards to a row. The ::after cell fills an unfinished last row with paper. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ink);
+}
+
+.cards:empty { display: none; }
+.cards::after { content: ""; background: var(--paper); }
+.cards:has(> .card:nth-child(3n + 1):last-child)::after { grid-column: span 2; }
+
+.cards:has(> .card:nth-child(3n):last-child)::after,
+.cards:not(:has(> .card))::after { display: none; }
+
+.cards > .empty { grid-column: 1 / -1; background: var(--paper); }
+
+.card {
+  --peek: calc(50px + 2.6em);   /* 20 + title 1.2em + 10 + line 1.4em + 20 */
+  position: relative;
+  overflow: hidden;
+  overflow: clip;               /* clip, so nothing can scroll the hidden part into view */
+  padding-bottom: calc(var(--peek) + 1px);
+  background: var(--paper);
+}
+
+.card__top { aspect-ratio: 1; padding: 20px var(--pad); }
+
+.card__amount {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card__who { margin-top: 6px; }
+
+/* The details panel. Closed, only the summary shows. Open, it slides up by its own height
+   (at least 40px), covering the lower part of the top area, never the amount. */
+.card__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  max-height: calc(100% - 96px);
+  overflow-y: auto;
+  border-top: 1px solid var(--ink);
+  background: var(--paper);
+  transform: translateY(calc(-1 * var(--peek) - 1px));
+  transition: transform 0.4s ease;
+}
+
+.card.is-open .card__panel,
+.card:has(:focus-visible) .card__panel { transform: translateY(-100%); }
+
+/* Closed, the breakdown is out of sight and out of reach; it stays visible while the panel slides shut. */
+.card .breakdown {
+  min-height: 40px;
+  padding: 0 var(--pad) 20px;
+  visibility: hidden;
+  transition: visibility 0s 0.4s;
+}
+
+.card.is-open .breakdown,
+.card:has(:focus-visible) .breakdown { visibility: visible; transition-delay: 0s; }
+
+@media (hover: hover) {
+  .card:hover .card__panel { transform: translateY(-100%); }
+  .card:hover .breakdown { visibility: visible; transition-delay: 0s; }
+}
+
+.card__summary { position: relative; height: var(--peek); padding: 20px var(--pad); overflow: hidden; }
+.card__summary .title { margin-bottom: 10px; }
+
+.card__toggle {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The button's hit area is the whole summary, so a tap anywhere on it opens the card. */
+.card__toggle::before { content: ""; position: absolute; inset: 0; }
+.card__toggle:focus-visible { outline: 0; }
+.card__summary:has(.card__toggle:focus-visible) { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+.card__line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card.is-dim { color: var(--mute); }
+
+/* ---------- 14. Footer and marquee ---------- */
+
+.foot__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ink);
+}
+
+.foot__cell { min-height: 148px; padding: 20px var(--pad); background: var(--paper); }
+.foot__mark { font-weight: 700; }
+.foot__tag { margin-top: 12px; font-size: var(--fs-small); }
+
+.foot__nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  font-size: var(--fs-small);
+}
+
+.foot__title {
+  margin-bottom: 10px;
+  font-size: var(--fs-small);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.foot__nav li + li { margin-top: 10px; }
+
+.foot__nav a,
+.foot__nav button { text-decoration: none; text-transform: none; }
+
+@media (hover: hover) {
+  .foot__nav a:hover,
+  .foot__nav button:hover { text-decoration: underline; text-underline-offset: 2px; }
+}
+
+/* One sentence, twice (or any even number of copies), moving left by half its width. */
+.marquee { overflow: hidden; }
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  padding: 8px 0 5px;
+  animation: marquee 60s linear infinite;
+}
+
+.marquee.is-paused .marquee__track { animation-play-state: paused; }
+
+.marquee__text {
+  flex: none;
+  padding: 0 180px 0 var(--pad);
+  font-size: 56px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- 15. Dialogs ---------- */
+
+dialog {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+dialog::backdrop { background: var(--paper); opacity: 0.88; }
+
+/* Centred panel: the bill editor and the share panel. */
+.modal {
+  width: min(680px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+}
+
+.modal--small { width: min(432px, calc(100% - 32px)); }
+
+.modal[open],
+.drawer[open] { display: flex; flex-direction: column; }
+
+.modal__head { flex: none; display: flex; min-height: var(--row); border-bottom: 1px solid var(--ink); }
+.modal__head .title { flex: 1; display: flex; align-items: center; min-width: 0; padding: 0 var(--pad); }
+.modal__head .x { border-left: 1px solid var(--ink); }
+.modal__head .x:focus-visible { outline-offset: -2px; }
+.modal__body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+
+/* Right-hand drawer: the group and every setting. */
+.drawer {
+  inset: 0 0 0 auto;
+  width: min(440px, 100%);
+  height: 100%;
+  margin: 0;
+  border-width: 0 0 0 1px;
+  transition: transform 0.4s ease;
+}
+
+@starting-style {
+  .drawer[open] { transform: translateX(100%); }
+}
+
+.drawer__sec { display: grid; gap: 12px; padding: 20px var(--pad); }
+.drawer__sec + .drawer__sec { border-top: 1px solid var(--ink); }
+.drawer__sec .actions { min-height: 0; padding: 0; }
+
+.people { display: grid; gap: 6px; }
+
+.people__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: 10px;
+}
+
+.people__note { font-size: var(--fs-small); color: var(--mute); text-transform: uppercase; }
+
+/* An input with its button attached. */
+.addrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+
+/* Share panel */
+.share { display: grid; align-content: start; gap: 12px; padding: 20px var(--pad); }
+.share__lead { margin-bottom: 8px; font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; }
+
+/* ---------- 16. Bill editor ---------- */
+
+.form > * + * { border-top: 1px solid var(--ink); }
+.form__sec { display: grid; gap: 12px; padding: 20px var(--pad); }
+
+.fields { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 92px; gap: 10px; }
+.fields--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Rate line under the amount. */
+.fx { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.fx__now { flex: 1 1 100%; color: var(--mute); }
+.fx__rate { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.fx__rate input:not([type="checkbox"], [type="radio"]) { width: 104px; min-height: 30px; text-align: right; }
+
+/* "Paid by" and "Split between". */
+.side__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 28px; }
+
+.prows { display: grid; }
+
+.prow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px 92px;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+
+.prow > label { display: flex; align-items: center; gap: 10px; min-width: 0; cursor: pointer; }
+.prow > label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow input:not([type="checkbox"], [type="radio"]) { min-height: 28px; text-align: right; }
+.prow__out { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prow.is-off { color: var(--mute); }
+
+/* Items on a bill. */
+.items { display: grid; }
+
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px 28px;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 0;
+}
+
+.item + .item { border-top: 1px solid var(--ink); }
+.item:first-child { padding-top: 0; }
+.item input:not([type="checkbox"], [type="radio"]) { min-height: 28px; }
+.item__amt { text-align: right; }
+.item .x { width: 28px; min-height: 28px; }
+.item__who { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.item__who button { color: var(--mute); text-transform: none; }
+.item__who button[aria-pressed="true"] { color: var(--ink); }
+
+.extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+/* What this bill adds: the one boxed thing in the editor. */
+.preview { display: grid; gap: 8px; padding: 16px var(--pad); border: 1px solid var(--ink); }
+.preview__list { display: grid; gap: 2px; }
+.preview__note { color: var(--mute); }
+
+/* Buttons along the bottom, built like the header. */
+.form__foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 1px;
+  background: var(--ink);
+}
+
+/* ---------- 17. Between phone and desktop ---------- */
+
+@media (max-width: 1099px) {
+  .bar__nav a { margin-left: 6px; }
+  .bar__nav a:first-child { margin-left: 10px; }
+  .bar__cell { width: 92px; }
+}
+
+@media (max-width: 1023px) {
+  /* The phase links get a row of their own. */
+  .head--stack { grid-template-columns: minmax(0, 1fr); }
+  .head--stack > .head__cell:nth-child(2) { grid-column: auto; }
+
+  .strip__cell { grid-column: span 3; }
+  .strip__cell--4 { grid-column: span 6; }
+}
+
+/* ---------- 18. Phones ---------- */
+
+@media (max-width: 767px) {
+  :root {
+    --pad: 16px;
+    --row: 44px;
+    --bar: 89px;      /* two 44px rows and the line between them */
+    --fs: 14px;
+    --fs-small: 12px;
+  }
+
+  /* 16px stops iOS from zooming into a focused field. */
+  input:not([type="checkbox"], [type="radio"]),
+  select,
+  textarea { font-size: 16px; }
+
+  input[type="checkbox"],
+  input[type="radio"] { width: 20px; height: 20px; padding: 4px; }
+
+  /* Header: wordmark, SHARE, GROUP on the first row; the section links on a second row. */
+  .bar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: 44px 44px;
+    gap: 1px;
+  }
+
+  .bar__rest { display: contents; }
+  .bar__brand { grid-area: 1 / 1; }
+  .bar__nav { grid-area: 2 / 1 / 3 / -1; padding: 0 6px; }
+  .bar__nav a,
+  .bar__nav a:first-child { margin-left: 0; }
+  .bar__cell { width: auto; min-width: 76px; padding: 0 16px; border-left: 0; }
+
+  .link { padding: 13px 0; }
+  .link::after { bottom: 11px; }
+  .btn { min-height: 48px; }
+
+  .block { padding: 40px var(--pad); }
+  .pairs > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .statement { padding: 48px var(--pad); }
+
+  .head { grid-template-columns: minmax(0, 1fr); }
+  .head > .head__cell:nth-child(2) { grid-column: auto; }
+  .head__cell { flex-wrap: wrap; }
+  .head__cell.phases { flex-wrap: nowrap; }
+  .head__cell:empty,
+  .head__cell:has(> .head__note:only-child:empty) { display: none; }
+
+  .actions { gap: 0 28px; padding-top: 4px; padding-bottom: 4px; }
+  .notice { padding-top: 4px; padding-bottom: 4px; }
+  .notice__text { padding: 8px 0; }
+
+  .status__btn { min-width: 96px; }
+
+  /* Write it down: the box, then how it reads, then the button, then the count. */
+  .write { grid-template-columns: minmax(0, 1fr); }
+  .write .write__input { min-height: 208px; }
+  .write__sum:empty { display: none; }
+  .reading__row { grid-template-columns: 2em 3.2em minmax(0, 1fr); }
+
+  .example { grid-template-columns: minmax(0, 1fr); }
+  .example > span { padding: 12px var(--pad) 0; }
+  .example > .example__note { padding-top: 2px; padding-bottom: 12px; }
+
+  /* Bills: each row becomes a small block. The title, then each value beside its label. */
+  .table--bills,
+  .table--bills tbody { display: block; }
+
+  .table--bills thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  /* The rows draw the lines here, so an empty list leaves no stray one. */
+  .band > .table--bills { border-top: 0; }
+  .table--bills tr { display: grid; gap: 6px; padding: 14px var(--pad); }
+
+  .table--bills th,
+  .table--bills td,
+  .table--bills th:first-child,
+  .table--bills td:first-child { display: block; width: auto; min-width: 0; padding: 0; }
+
+  .bill__amt,
+  .bill__paid,
+  .bill__split { position: relative; padding-left: 5.5em !important; }
+
+  .bill__amt::before,
+  .bill__paid::before,
+  .bill__split::before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: var(--fs-small);
+    font-weight: 700;
+    line-height: calc(var(--fs) * 1.4);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .bill__amt::before { content: "Amount"; }
+  .bill__paid::before { content: "Paid by"; }
+  .bill__split::before { content: "Split"; }
+
+  .table--totals th,
+  .table--totals td { padding: 13px 6px; }
+  .table--totals th:first-child,
+  .table--totals td:first-child { width: 24%; padding-left: var(--pad); }
+  .table--totals th:last-child,
+  .table--totals td:last-child { padding-right: var(--pad); }
+
+  /* Graph */
+  .graph__hint { position: static; max-width: none; padding: 12px var(--pad) 0; }
+  .phase { min-height: var(--row); }
+
+  .strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .strip__cell { grid-column: span 2; min-height: 48px; }
+  .strip__cell--2 { grid-column: span 4; }
+  .strip__cell--4 { grid-column: span 6; }
+  .strip__cell--last { grid-column: span 6; }
+
+  .narration { min-height: 0; }
+  .trail__step { align-items: center; min-height: 44px; padding: 6px 0; }
+
+  /* The floating breakdown sits under the graph instead of over it. */
+  .breakdown--float {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    width: auto;
+    max-height: none;
+    border-width: 1px 0 0;
+  }
+
+  /* Settle cards: one to a row; a tap opens the breakdown in place. */
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .cards::after { display: none; }
+  .card { padding-bottom: 0; }
+  .card__top { aspect-ratio: auto; padding-bottom: 28px; }
+
+  .card__panel,
+  .card.is-open .card__panel,
+  .card:has(:focus-visible) .card__panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    transform: none;
+    transition: none;
+  }
+
+  .card__summary { height: auto; }
+  .card__line { white-space: normal; }
+  .card .breakdown { display: none; }
+  .card.is-open .breakdown { display: grid; }
+
+  /* Footer: one cell per row, links in two columns with room for a thumb. */
+  .foot__grid { grid-template-columns: minmax(0, 1fr); }
+  .foot__cell { min-height: 0; }
+  .foot__cell:empty { display: none; }
+  .foot__nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .foot__title { margin-bottom: 0; }
+  .foot__nav li + li { margin-top: 0; }
+  .foot__nav a,
+  .foot__nav button { display: flex; align-items: center; min-height: 44px; }
+
+  /* The editor and the drawer fill the screen. The share panel stays a small box. */
+  .modal:not(.modal--small),
+  .drawer {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    border: 0;
+  }
+
+  .fields { grid-template-columns: minmax(0, 1fr) 104px; }
+  .fields > .field:first-child { grid-column: 1 / -1; }
+  .fields--two > .field:first-child { grid-column: auto; }
+  .fields--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .modes { gap: 0 20px; }
+  .modes button,
+  .item__who button { min-height: 44px; }
+
+  .prow { grid-template-columns: minmax(0, 1fr) 88px 84px; min-height: 48px; }
+  .prow > label { min-height: 48px; }
+  .prow input:not([type="checkbox"], [type="radio"]),
+  .item input:not([type="checkbox"], [type="radio"]),
+  .fx__rate input:not([type="checkbox"], [type="radio"]),
+  .rates input:not([type="checkbox"], [type="radio"]) { min-height: 44px; }
+
+  .item { grid-template-columns: minmax(0, 1fr) 88px 44px; }
+  .item .x { width: 44px; min-height: 44px; }
+  .item__who { gap: 0 20px; }
+  .check { min-height: 44px; }
+
+  .form__foot { flex-wrap: wrap; }
+  .form__foot .cell { flex: 1; padding: 0 12px; min-height: 48px; }
+  .form__foot .cell--grow { display: none; }
+  .form__foot .cell--solid { flex: 1 1 100%; }
+
+  .people__row { grid-template-columns: minmax(0, 1fr) 84px; }
+}
+
+/* ---------- 19. Motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- 20. Inside the graph ---------- */
+
+/* The drawing itself. The markup comes from js/graph.js; every class starts with g-.
+   The same three colours as the rest of the page: --ink, --paper and --mute.
+   Sizes are in the picture's own units, so they scale with the picture. */
+
+/* Arrows: ink by default. */
+.g-edge { fill: none; stroke: var(--ink); }
+.g-edge.is-off { stroke: var(--mute); }            /* not part of the current step */
+.g-edge.is-down { stroke-dasharray: 6 5; }         /* getting smaller */
+.g-edge.is-hov { stroke: var(--ink); }
+.g-edge.is-gone { opacity: 0.25; }                 /* has just reached zero */
+
+.g-mk-ink { fill: var(--ink); }
+.g-mk-mute { fill: var(--mute); }
+
+/* Wide, invisible copy of each arrow, so it is easy to point at or tap. */
+.g-hit { fill: none; stroke: transparent; pointer-events: stroke; cursor: pointer; }
+
+/* Amount labels: a paper box with a hairline. */
+.g-lbl { cursor: pointer; }
+.g-lbl rect {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: crispEdges;
+}
+.g-amt { fill: var(--ink); font-size: 11px; font-variant-numeric: tabular-nums; }
+.g-cap { fill: var(--mute); font-size: 10px; }
+.g-lbl.is-on .g-amt { font-weight: 700; }
+.g-lbl.is-off rect { stroke: var(--mute); }
+.g-lbl.is-off .g-amt { fill: var(--mute); }
+.g-lbl.is-down rect { stroke-dasharray: 3 2; }
+.g-lbl.is-hov rect { stroke: var(--ink); stroke-width: 2px; }
+.g-lbl.is-hov .g-amt { fill: var(--ink); }
+
+/* People. Owes: paper circle. Gets: ink circle. Even: grey outline. */
+.g-node { cursor: pointer; }
+.g-disc, .g-ring { stroke: var(--ink); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.g-disc { fill: var(--paper); }
+.g-ring { fill: none; }                            /* second line inside the circle: in the current step, or pointed at */
+.g-ini, .g-name { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.g-bal { fill: var(--ink); font-size: 11px; font-variant-numeric: tabular-nums; }
+/* A paper edge around the words keeps them readable where an arrow passes behind. */
+.g-name, .g-bal { paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; }
+
+.g-node.is-get .g-disc { fill: var(--ink); }
+.g-node.is-get .g-ini { fill: var(--paper); }
+.g-node.is-get .g-ring { stroke: var(--paper); }
+.g-node.is-even .g-disc, .g-node.is-even .g-ring { stroke: var(--mute); }
+.g-node.is-even .g-ini, .g-node.is-even .g-bal { fill: var(--mute); }
+.g-node.is-hov .g-disc { stroke-width: 3px; }
+
+/* The dot that travels along a path. */
+.g-token { fill: var(--ink); stroke: var(--paper); stroke-width: 2px; pointer-events: none; }
+
+.g-empty { fill: var(--mute); font-size: 12px; }
+
+/* Following one person: everything that does not touch them steps back. */
+.g-edge.is-dim, .g-lbl.is-dim, .g-node.is-dim { opacity: 0.15; }
+
+.g-lbl text, .g-node text, .g-empty { -webkit-user-select: none; user-select: none; }
+
+/* ---------- 21. Stage additions ---------- */
+
+/* Rules js/stage.js needs that COMPONENTS.md does not cover. */
+
+/* Until a click pins it, the floating breakdown follows the pointer. It must not catch the pointer
+   itself, or the arrow underneath would lose it. */
+.breakdown--float:not(.is-pinned) { pointer-events: none; }
+
+/* Only the first note of a breakdown draws the hairline. */
+.breakdown__note + .breakdown__note { padding-top: 0; border-top: 0; }
+
+/* Totals table: a person's row opens to show their bills in a row of its own (tr.total__more) underneath.
+   The name is a button with the same shrinking underline as a bill's title. */
+.total { cursor: pointer; }
+.total.is-dim { color: var(--mute); }
+
+.total__open {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.total__open::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+
+@media (hover: hover) {
+  .total:hover .total__open::after { width: 0; }
+}
+
+/* ---------- 22. Editor additions ---------- */
+
+/* Added with js/editor.js: the few things section 16 does not cover. */
+
+/* A status line under a row of fields takes the whole row. */
+.fields > .say { grid-column: 1 / -1; }
+.fx > .say { flex: 1 1 100%; }
+
+/* "As text": the bill the way it could be typed. Read only, and as tall as its text. */
+.form__text { field-sizing: content; resize: none; }
+
+/* The row of buttons sticks to the bottom of the form. A field that takes the focus stops above it. */
+.modal__body:has(> .form) { scroll-padding-bottom: 56px; }
+
+@media (max-width: 767px) {
+  /* On phones the buttons take two rows. */
+  .modal__body:has(> .form) { scroll-padding-bottom: 112px; }
+
+  /* DELETE turns into DELETE THIS BILL, so these cells follow their words instead of sharing the row equally. */
+  .form__foot .cell:not(.cell--grow, .cell--solid) { flex: 1 1 auto; }
+}

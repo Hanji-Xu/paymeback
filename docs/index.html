@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pay Me Back</title>
+<meta name="description" content="Split bills with friends. Write down who paid for what and see, step by step, how the debts shrink to a few payments. Nothing is uploaded.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://open.er-api.com; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32'/%3E%3Ccircle cx='9' cy='16' r='5' fill='%23fff'/%3E%3Ccircle cx='23' cy='16' r='4.5' fill='none' stroke='%23fff'/%3E%3Cpath d='M14 16h4.5' stroke='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./css/style.css">
+<script type="module" src="./js/app.js"></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to the page</a>
+
+<header class="bar" id="top">
+  <a class="bar__brand" href="#top">Pay Me Back</a>
+  <div class="bar__rest">
+    <nav class="bar__nav" id="nav" aria-label="Sections">
+      <a href="#bills" data-text="Bills">Bills</a>
+      <a href="#graph" data-text="Graph">Graph</a>
+      <a href="#settle" data-text="Settle up">Settle up</a>
+      <a href="#method" data-text="Method">Method</a>
+    </nav>
+    <button type="button" class="bar__cell" id="share-open" data-open="share" aria-haspopup="dialog">Share</button>
+    <button type="button" class="bar__cell" id="group-open" data-open="group" aria-haspopup="dialog">Group <span id="people-count"></span></button>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="notice" id="notice" role="alert" hidden></div>
+
+  <noscript>
+    <p class="notice">This tool needs JavaScript. Without it you can read the page, but nothing is worked out.</p>
+  </noscript>
+
+  <div class="block" id="intro">
+    <div class="block__col">
+      <h1 class="title">Pay Me Back splits bills and shows its work</h1>
+      <p>Write down who paid for what. Pay Me Back works out who owes whom, then shows, step by step, how those debts shrink to the few payments that settle everything. Every amount is exact to the cent, and you can see which bills it comes from.</p>
+      <p>The page opens with an example trip so you can see how it works. Change it, or clear it and write your own. Nothing is uploaded: your bills stay in this browser and in the link you share.</p>
+    </div>
+  </div>
+
+  <section id="bills" aria-labelledby="write-title">
+
+    <div class="band" id="write">
+      <div class="write">
+        <div class="write__cell">
+          <div class="write__head">
+            <h2 class="title" id="write-title">Write it down</h2>
+            <span class="head__note">One bill per line</span>
+          </div>
+          <textarea class="write__input" id="draft" rows="10" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Bills, one per line" placeholder="Dinner 120 paid by Ana&#10;Taxi $45 paid by Ben for Ana and Cy"></textarea>
+        </div>
+        <div class="write__cell">
+          <div class="write__head">
+            <h3 class="title">How it reads</h3>
+          </div>
+          <div class="write__read">
+            <ol class="reading" id="reading"></ol>
+            <p class="reading__hint" id="reading-hint">Each line is read back here as you type. Nothing is added until you press ADD BILLS.</p>
+          </div>
+        </div>
+        <button type="button" class="btn write__go" id="draft-add" disabled>Add bills</button>
+        <p class="write__sum" id="draft-summary" role="status"></p>
+      </div>
+      <details class="more" id="examples">
+        <summary class="more__sum"><span class="title">What you can write</span></summary>
+        <ul class="examples">
+          <li><button type="button" class="example" data-example="Dinner 120 paid by Ana"><span class="example__line">Dinner 120 paid by Ana</span><span class="example__note">Everyone shares it equally.</span></button></li>
+          <li><button type="button" class="example" data-example="Taxi $45 paid by Ben for Ana and Cy"><span class="example__line">Taxi $45 paid by Ben for Ana and Cy</span><span class="example__note">Ben paid. Only Ana and Cy share it.</span></button></li>
+          <li><button type="button" class="example" data-example="Ana paid €60 for museum tickets, split with Ben and Cy"><span class="example__line">Ana paid €60 for museum tickets, split with Ben and Cy</span><span class="example__note">Payer first. “With” counts the payer in: Ana, Ben and Cy share it.</span></button></li>
+          <li><button type="button" class="example" data-example="Hotel 300 EUR paid by Ana 200, Ben 100"><span class="example__line">Hotel 300 EUR paid by Ana 200, Ben 100</span><span class="example__note">Two people paid. Their amounts must add up to the total.</span></button></li>
+          <li><button type="button" class="example" data-example="Groceries 90 paid by Cy, split Ana x2, Ben x1, Cy x1"><span class="example__line">Groceries 90 paid by Cy, split Ana x2, Ben x1, Cy x1</span><span class="example__note">By shares: Ana takes two shares, Ben and Cy one each.</span></button></li>
+          <li><button type="button" class="example" data-example="Lunch 64 paid by Eli for everyone except Dee"><span class="example__line">Lunch 64 paid by Eli for everyone except Dee</span><span class="example__note">Everyone but Dee shares it.</span></button></li>
+          <li><button type="button" class="example" data-example="Dinner at the taberna, paid by Dee, tip 10%&#10;  - Bacalhau 38 Ben&#10;  - Shared petiscos 30 Ana, Eli&#10;  - Vinho verde 52: Ana, Ben, Dee"><span class="example__line">Dinner at the taberna, paid by Dee, tip 10%
+  - Bacalhau 38 Ben
+  - Shared petiscos 30 Ana, Eli
+  - Vinho verde 52: Ana, Ben, Dee</span><span class="example__note">Item by item. Each person pays for what they had, and the tip is shared in the same proportion.</span></button></li>
+          <li><button type="button" class="example" data-example="Cy paid Ana back 50"><span class="example__line">Cy paid Ana back 50</span><span class="example__note">A payment from one person to another.</span></button></li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="band" id="bill-list">
+      <div class="head">
+        <div class="head__cell"><h2 class="title" id="group-name">Bills</h2></div>
+        <div class="head__cell"><span class="head__note" id="bills-summary"></span></div>
+      </div>
+      <table class="table table--bills">
+        <thead>
+          <tr>
+            <th scope="col">Bill</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Paid by</th>
+            <th scope="col">Split</th>
+          </tr>
+        </thead>
+        <tbody id="bills-body"></tbody>
+      </table>
+      <div class="actions">
+        <button type="button" class="link" id="bill-new">Add with a form</button>
+        <button type="button" class="link" id="payment-new">Add a payment</button>
+        <button type="button" class="link" id="bills-copy">Copy all as text</button>
+        <button type="button" class="link" id="bills-clear">Clear all</button>
+      </div>
+    </div>
+
+  </section>
+
+  <section id="graph" aria-labelledby="graph-title">
+
+    <div class="band">
+      <div class="head head--stack">
+        <div class="head__cell">
+          <h2 class="title" id="graph-title">Graph</h2>
+          <span class="head__note" id="graph-summary"></span>
+        </div>
+        <div class="head__cell phases" id="phases" role="group" aria-label="Phases"></div>
+      </div>
+      <div class="graph" id="graph-box">
+        <p class="graph__hint">Point at or tap an arrow or a person to see which bills the money comes from.</p>
+        <svg class="graph__svg" id="graph-svg" viewBox="0 0 720 480" role="img" aria-label="Who owes whom"></svg>
+        <div class="breakdown breakdown--float" id="graph-panel" hidden></div>
+      </div>
+      <div class="strip" id="controls" role="group" aria-label="Steps">
+        <button type="button" class="strip__cell" id="step-prev">Previous</button>
+        <button type="button" class="strip__cell strip__cell--solid" id="step-play">Play</button>
+        <button type="button" class="strip__cell" id="step-next">Next</button>
+        <span class="strip__cell" id="step-count"></span>
+        <label class="strip__cell strip__cell--2">
+          <span class="strip__label">Speed</span>
+          <select id="speed">
+            <option value="0.6">Slow</option>
+            <option value="1" selected>Normal</option>
+            <option value="1.8">Fast</option>
+          </select>
+        </label>
+        <span class="strip__cell strip__cell--4 strip__modes" role="group" aria-label="Simplify for">
+          <button type="button" id="mode-fewest" data-mode="fewest" data-text="Fewest payments" aria-pressed="true">Fewest payments</button>
+          <button type="button" id="mode-keep" data-mode="keep" data-text="Only existing debts" aria-pressed="false">Only existing debts</button>
+        </span>
+        <label class="strip__cell strip__cell--2 strip__cell--last">
+          <span class="strip__label">Follow</span>
+          <select id="follow">
+            <option value="">Everyone</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="block" id="narration">
+      <div class="block__col narration">
+        <div aria-live="polite">
+          <p class="eyebrow" id="step-phase"></p>
+          <h3 class="title" id="step-title"></h3>
+          <p id="step-text"></p>
+        </div>
+        <p class="say" id="step-check" hidden><b class="tag">OK</b><span>Every balance is unchanged.</span></p>
+        <div class="trail" id="trail" hidden></div>
+      </div>
+    </div>
+
+  </section>
+
+  <section id="settle" aria-labelledby="settle-title">
+
+    <div class="statement"><p id="statement" aria-live="polite"></p></div>
+
+    <div class="band">
+      <div class="head">
+        <div class="head__cell"><h2 class="title" id="settle-title">Settle up</h2></div>
+        <div class="head__cell"><span class="head__note" id="settle-note"></span></div>
+      </div>
+      <div class="cards" id="settle-cards"></div>
+    </div>
+
+    <div class="band">
+      <div class="head">
+        <div class="head__cell"><h3 class="title">What each person paid and owes</h3></div>
+        <div class="head__cell"><span class="head__note" id="totals-note"></span></div>
+      </div>
+      <table class="table table--totals">
+        <thead>
+          <tr>
+            <th scope="col">Person</th>
+            <th scope="col" class="num">Paid</th>
+            <th scope="col" class="num">Share</th>
+            <th scope="col" class="num">Net</th>
+          </tr>
+        </thead>
+        <tbody id="totals-body"></tbody>
+      </table>
+      <div class="actions">
+        <button type="button" class="link" id="plan-copy">Copy plan</button>
+      </div>
+    </div>
+
+  </section>
+
+  <section id="method" aria-label="Method">
+
+    <div class="block">
+      <div class="block__col">
+        <h2 class="title">How the simplifying works</h2>
+        <p>Every bill turns into debts: each person who shared it owes the person who paid. A trip with a few bills can leave a tangle of small debts. Pay Me Back untangles them with five moves, one step at a time. No move changes what anyone owes or gets in total.</p>
+        <dl class="pairs">
+          <div><dt>Add bills</dt><dd>Each bill is drawn as arrows from the people who shared it to the people who paid.</dd></div>
+          <div><dt>Net pairs</dt><dd>If Ana owes Ben 30 and Ben owes Ana 10, Ana owes Ben 20.</dd></div>
+          <div><dt>Cancel loops</dt><dd>If Ana owes Ben, Ben owes Cy and Cy owes Ana, the same amount comes off all three.</dd></div>
+          <div><dt>Skip middlemen</dt><dd>If Ana owes Ben and Ben owes Cy, Ana pays Cy directly.</dd></div>
+          <div><dt>Swap payees</dt><dd>If Ana and Ben both owe Cy and Dee, who pays whom is swapped around so that one payment drops out.</dd></div>
+        </dl>
+        <p>FEWEST PAYMENTS lets anyone pay anyone. ONLY EXISTING DEBTS keeps every payment between two people who already owed each other.</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block__col">
+        <h2 class="title">What accurate means here</h2>
+        <dl class="pairs">
+          <div><dt>Whole cents</dt><dd>Every amount is a whole number of cents, or of yen for currencies without cents. There are no fractions to drift.</dd></div>
+          <div><dt>Fair rounding</dt><dd>When a split does not divide evenly, the spare cents go to the shares that were cut the most. The parts always add up to the bill.</dd></div>
+          <div><dt>Checked at every step</dt><dd>After each step the page checks that every person still owes or gets exactly what they did before, and says so under the graph.</dd></div>
+          <div><dt>Dated rates</dt><dd>A bill in another currency shows its rate, the date of that rate and where it came from. Rates stay as they are until someone presses UPDATE RATES, so everyone with the link sees the same numbers.</dd></div>
+          <div><dt>No guessing</dt><dd>A line that can be read two ways is marked FIX, with what to change. It is never added as a guess.</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block__col">
+        <h2 class="title">Where your data goes</h2>
+        <p>Your groups are saved in this browser. To share one, press SHARE: the whole group is packed into the link itself. Nothing is uploaded, and there are no accounts.</p>
+        <p>If someone sends you a link to a group you already have and theirs is different, you choose which version to keep. Yours is never replaced without asking.</p>
+        <p>The page loads no fonts, no pictures and no trackers. The only outside request is for exchange rates, at most once a day. <a href="https://www.exchangerate-api.com" rel="noopener">Rates by Exchange Rate API</a>.</p>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot__grid">
+    <div class="foot__cell">
+      <p class="foot__mark">Pay Me Back</p>
+      <p class="foot__tag">Split bills and see how the debts settle.<br>No accounts, no uploads, no tracking.</p>
+    </div>
+    <div class="foot__cell"></div>
+    <nav class="foot__cell foot__nav" aria-label="Footer">
+      <div>
+        <h2 class="foot__title">Page</h2>
+        <ul>
+          <li><a href="#bills">Bills</a></li>
+          <li><a href="#graph">Graph</a></li>
+          <li><a href="#settle">Settle up</a></li>
+          <li><a href="#method">Method</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="foot__title">Group</h2>
+        <ul>
+          <li><button type="button" data-open="share">Share the link</button></li>
+          <li><button type="button" data-open="group">People and settings</button></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="foot__title">Rates</h2>
+        <ul>
+          <li><a href="https://www.exchangerate-api.com" rel="noopener">Rates by Exchange Rate API</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</footer>
+
+<div class="marquee" id="marquee" aria-hidden="true">
+  <div class="marquee__track" id="marquee-track">
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+    <span class="marquee__text">If A owes B and B owes C, A pays C.</span>
+  </div>
+</div>
+
+<div class="status" id="status" role="status" hidden>
+  <p class="status__text" id="status-text"></p>
+  <button type="button" class="status__btn" id="status-undo">Undo</button>
+</div>
+
+<dialog class="modal" id="editor" aria-labelledby="editor-title">
+  <div class="modal__head">
+    <h2 class="title" id="editor-title">Bill</h2>
+    <button type="button" class="x" data-close aria-label="Close"></button>
+  </div>
+  <div class="modal__body" id="editor-body"></div>
+</dialog>
+
+<dialog class="drawer" id="drawer" aria-labelledby="drawer-title">
+  <div class="modal__head">
+    <h2 class="title" id="drawer-title">Group</h2>
+    <button type="button" class="x" data-close aria-label="Close"></button>
+  </div>
+  <div class="modal__body" id="drawer-body"></div>
+</dialog>
+
+<dialog class="modal modal--small" id="share" aria-labelledby="share-title">
+  <div class="modal__head">
+    <h2 class="title" id="share-title">Share</h2>
+    <button type="button" class="x" data-close aria-label="Close"></button>
+  </div>
+  <div class="modal__body share" id="share-body">
+    <p class="share__lead">Everything is inside this link. Nothing is uploaded.</p>
+    <label class="field">
+      <span class="field__label">Link to this group</span>
+      <input type="text" id="share-link" readonly>
+    </label>
+    <button type="button" class="btn btn--wide" id="share-copy">Copy link</button>
+    <button type="button" class="link" id="share-native" hidden>Share another way</button>
+    <p class="mute" id="share-length"></p>
+  </div>
+</dialog>
+
+</body>
+</html>
