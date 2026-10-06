@@ -44,14 +44,14 @@
     <div class="band" id="write">
       <div class="write">
         <div class="write__cell">
-          <div class="write__head">
+          <div class="write__head write__head--major">
             <h2 class="title" id="write-title">Write it down</h2>
             <span class="head__note">One bill per line</span>
           </div>
           <textarea class="write__input" id="draft" rows="10" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Bills, one per line" placeholder="Dinner 120 paid by Ana&#10;Taxi $45 paid by Ben for Ana and Cy"></textarea>
         </div>
         <div class="write__cell">
-          <div class="write__head">
+          <div class="write__head write__head--major">
             <h3 class="title">How it reads</h3>
           </div>
           <div class="write__read">
@@ -81,7 +81,7 @@
     </div>
 
     <div class="band" id="bill-list">
-      <div class="head">
+      <div class="head head--major">
         <div class="head__cell"><h2 class="title" id="group-name">Bills</h2></div>
         <div class="head__cell"><span class="head__note" id="bills-summary"></span></div>
       </div>
@@ -109,17 +109,12 @@
   <section id="graph" aria-labelledby="graph-title">
 
     <div class="band">
-      <div class="head head--stack">
+      <div class="head head--stack head--major">
         <div class="head__cell">
           <h2 class="title" id="graph-title">Graph</h2>
           <span class="head__note" id="graph-summary"></span>
         </div>
         <div class="head__cell phases" id="phases" role="group" aria-label="Phases"></div>
-      </div>
-      <div class="graph" id="graph-box">
-        <p class="graph__hint">Point at or tap an arrow or a person to see which bills the money comes from.</p>
-        <svg class="graph__svg" id="graph-svg" viewBox="0 0 720 480" role="img" aria-label="Who owes whom"></svg>
-        <div class="breakdown breakdown--float" id="graph-panel" hidden></div>
       </div>
       <div class="strip" id="controls" role="group" aria-label="Steps">
         <button type="button" class="strip__cell" id="step-prev">Previous</button>
@@ -145,6 +140,12 @@
           </select>
         </label>
       </div>
+      <div class="graph" id="graph-box">
+        <p class="graph__hint">Point at or tap an arrow or a person to see which bills the money comes from.</p>
+        <svg class="graph__svg" id="graph-svg" viewBox="0 0 720 480" role="img" aria-label="Who owes whom"></svg>
+        <div class="breakdown breakdown--float" id="graph-panel" hidden></div>
+        <button type="button" class="graph__play" id="graph-play" hidden>Play the steps from the start</button>
+      </div>
     </div>
 
     <div class="block" id="narration">
@@ -166,7 +167,7 @@
     <div class="statement"><p id="statement" aria-live="polite"></p></div>
 
     <div class="band">
-      <div class="head">
+      <div class="head head--major">
         <div class="head__cell"><h2 class="title" id="settle-title">Settle up</h2></div>
         <div class="head__cell"><span class="head__note" id="settle-note"></span></div>
       </div>
@@ -174,7 +175,7 @@
     </div>
 
     <div class="band">
-      <div class="head">
+      <div class="head head--major">
         <div class="head__cell"><h3 class="title">What each person paid and owes</h3></div>
         <div class="head__cell"><span class="head__note" id="totals-note"></span></div>
       </div>

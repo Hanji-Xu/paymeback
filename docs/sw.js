@@ -11,7 +11,7 @@
    Change the number in CACHE whenever this file changes. The old cache is deleted once every tab that
    still runs the old worker has been closed. */
 
-const CACHE = 'paymeback-v1';   // the files visits are served from
+const CACHE = 'paymeback-v2';   // the files visits are served from
 const NEXT = CACHE + '-next';      // a newer version, fetched during a visit, for the next one
 const ROOT = new URL('./', self.location).href;   // this file sits next to index.html
 const FILES = ['./', './css/style.css', './js/app.js', './js/core.js', './js/editor.js', './js/graph.js',

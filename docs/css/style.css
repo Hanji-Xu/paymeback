@@ -1457,7 +1457,6 @@ dialog::backdrop { background: var(--paper); opacity: 0.88; }
 /* ---------- 19. Motion ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1620,4 +1619,60 @@ main > section:first-of-type { margin-top: 0; border-top: 0; }
   #settle .band + .band { margin-top: 48px; }
   .bar--plain { grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px 44px; }
   .bar--plain .bar__rest { border-left: 0; }
+}
+
+/* ---------- Section header rows and the play button on the drawing ---------- */
+
+/* The big sections open with a black row and a larger title. The 1px gaps between cells stay paper. */
+.head--major { background: var(--paper); }
+.head--major .head__cell,
+.write__head--major {
+  min-height: 64px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.head--major .title,
+.write__head--major .title { font-size: 20px; letter-spacing: 0; }
+.head--major .head__note,
+.write__head--major .head__note,
+.head--major .phase.is-empty { color: var(--paper); opacity: 0.6; }
+.head--major .phase:focus-visible,
+.head--major .head__cell :focus-visible { outline-color: var(--paper); }
+.write__head--major { border-bottom: 0; }
+
+/* One black button on the drawing itself, shown while the picture stands on the settled result. */
+.graph__play {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.graph__play::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 12px;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent var(--paper);
+  vertical-align: -1px;
+}
+.graph__play:focus-visible { outline-color: var(--paper); outline-offset: -4px; }
+
+@media (max-width: 767px) {
+  .head--major .head__cell,
+  .write__head--major { min-height: 56px; }
+  .head--major .title,
+  .write__head--major .title { font-size: 18px; }
+  .graph__play { bottom: 12px; padding: 0 18px; }
 }

@@ -379,6 +379,7 @@ export function initStage(store) {
   const $ = id => document.getElementById(id);
   const section = $('graph'), box = $('graph-box'), svg = $('graph-svg'), panel = $('graph-panel');
   const controls = $('controls'), prevBtn = $('step-prev'), playBtn = $('step-play'), nextBtn = $('step-next');
+  const bigPlay = $('graph-play');
   const speedSel = $('speed'), followSel = $('follow'), modeBtns = [$('mode-fewest'), $('mode-keep')];
   const phases = $('phases'), check = $('step-check'), trail = $('trail');
   const cards = $('settle-cards'), totals = $('totals-body'), copyBtn = $('plan-copy');
@@ -492,6 +493,8 @@ export function initStage(store) {
     const i = player.index, last = steps.length - 1, step = steps[i];
     put($('step-count'), i + ' / ' + last);
     put(playBtn, player.playing ? 'Pause' : 'Play');
+    // The black button on the drawing: only while the picture stands still on the settled result.
+    bigPlay.hidden = !(i === last && !player.playing && !player.moving && steps.rawCount);
     setEnds(i === 0, i === last);
     put($('step-phase'), `Step ${i} of ${last} · ${PHASES[step.phase].label}`);
     put($('step-title'), step.title);
@@ -594,6 +597,7 @@ export function initStage(store) {
   prevBtn.addEventListener('click', () => jump(player.index - 1, false));
   nextBtn.addEventListener('click', () => jump(player.index + 1, true));
   playBtn.addEventListener('click', () => player.play(!player.playing));
+  bigPlay.addEventListener('click', () => { player.play(true); playBtn.focus(); });
   speedSel.addEventListener('change', () => store.setUI({ speed: Number(speedSel.value) }));
   followSel.addEventListener('change', () => store.setUI({ focus: followSel.value }));
   modeBtns.forEach(b => b.addEventListener('click', () => store.setUI({ mode: b.dataset.mode })));
