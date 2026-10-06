@@ -15,7 +15,7 @@ const CACHE = 'paymeback-v1';   // the files visits are served from
 const NEXT = CACHE + '-next';      // a newer version, fetched during a visit, for the next one
 const ROOT = new URL('./', self.location).href;   // this file sits next to index.html
 const FILES = ['./', './css/style.css', './js/app.js', './js/core.js', './js/editor.js', './js/graph.js',
-  './js/parse.js', './js/share.js', './js/simplify.js', './js/stage.js', './js/store.js'];
+  './js/parse.js', './js/share.js', './js/simplify.js', './js/stage.js', './js/store.js', './method.html'];
 
 // "no-cache" makes the browser ask the server every time, so files fetched together are of one version.
 const fetchAll = () => Promise.all(FILES.map(url => fetch(new Request(url, { cache: 'no-cache' }))));

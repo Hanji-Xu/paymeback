@@ -1596,3 +1596,28 @@ dialog::backdrop { background: var(--paper); opacity: 0.88; }
   /* DELETE turns into DELETE THIS BILL, so these cells follow their words instead of sharing the row equally. */
   .form__foot .cell:not(.cell--grow, .cell--solid) { flex: 1 1 auto; }
 }
+
+/* ---------- Hierarchy: air between the big sections, quieter bill list, the method page ---------- */
+
+/* Each big section (bills, graph, settle up) starts after a gap, with its own top line. */
+main > section { margin-top: 72px; border-top: 1px solid var(--ink); }
+main > section:first-of-type { margin-top: 0; border-top: 0; }
+
+/* The totals table is its own part of the page, not a row of the settle-up band. */
+#settle .band + .band { margin-top: 72px; border-top: 1px solid var(--ink); }
+
+/* Bills already added sit back in grey; the one under the pointer or keyboard comes forward. */
+.table--bills tbody { color: var(--mute); }
+.table--bills tbody tr:hover,
+.table--bills tbody tr:focus-within { color: var(--ink); }
+
+/* The method page: a header with only the wordmark and the section links. */
+.bar--plain .bar__rest { border-left: 1px solid var(--ink); }
+.block--lead h1.title { margin-bottom: 20px; }
+
+@media (max-width: 767px) {
+  main > section,
+  #settle .band + .band { margin-top: 48px; }
+  .bar--plain { grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px 44px; }
+  .bar--plain .bar__rest { border-left: 0; }
+}

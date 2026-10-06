@@ -24,7 +24,7 @@
       <a href="#bills" data-text="Bills">Bills</a>
       <a href="#graph" data-text="Graph">Graph</a>
       <a href="#settle" data-text="Settle up">Settle up</a>
-      <a href="#method" data-text="Method">Method</a>
+      <a href="./method.html" data-text="Method">Method</a>
     </nav>
     <button type="button" class="bar__cell" id="share-open" data-open="share" aria-haspopup="dialog">Share</button>
     <button type="button" class="bar__cell" id="group-open" data-open="group" aria-haspopup="dialog">Group <span id="people-count"></span></button>
@@ -38,14 +38,6 @@
   <noscript>
     <p class="notice">This tool needs JavaScript. Without it you can read the page, but nothing is worked out.</p>
   </noscript>
-
-  <div class="block" id="intro">
-    <div class="block__col">
-      <h1 class="title">Pay Me Back splits bills and shows its work</h1>
-      <p>Write down who paid for what. Pay Me Back works out who owes whom, then shows, step by step, how those debts shrink to the few payments that settle everything. Every amount is exact to the cent, and you can see which bills it comes from.</p>
-      <p>The page opens with an example trip so you can see how it works. Change it, or clear it and write your own. Nothing is uploaded: your bills stay in this browser and in the link you share.</p>
-    </div>
-  </div>
 
   <section id="bills" aria-labelledby="write-title">
 
@@ -204,47 +196,6 @@
 
   </section>
 
-  <section id="method" aria-label="Method">
-
-    <div class="block">
-      <div class="block__col">
-        <h2 class="title">How the simplifying works</h2>
-        <p>Every bill turns into debts: each person who shared it owes the person who paid. A trip with a few bills can leave a tangle of small debts. Pay Me Back untangles them with five moves, one step at a time. No move changes what anyone owes or gets in total.</p>
-        <dl class="pairs">
-          <div><dt>Add bills</dt><dd>Each bill is drawn as arrows from the people who shared it to the people who paid.</dd></div>
-          <div><dt>Net pairs</dt><dd>If Ana owes Ben 30 and Ben owes Ana 10, Ana owes Ben 20.</dd></div>
-          <div><dt>Cancel loops</dt><dd>If Ana owes Ben, Ben owes Cy and Cy owes Ana, the same amount comes off all three.</dd></div>
-          <div><dt>Skip middlemen</dt><dd>If Ana owes Ben and Ben owes Cy, Ana pays Cy directly.</dd></div>
-          <div><dt>Swap payees</dt><dd>If Ana and Ben both owe Cy and Dee, who pays whom is swapped around so that one payment drops out.</dd></div>
-        </dl>
-        <p>FEWEST PAYMENTS lets anyone pay anyone. ONLY EXISTING DEBTS keeps every payment between two people who already owed each other.</p>
-      </div>
-    </div>
-
-    <div class="block">
-      <div class="block__col">
-        <h2 class="title">What accurate means here</h2>
-        <dl class="pairs">
-          <div><dt>Whole cents</dt><dd>Every amount is a whole number of cents, or of yen for currencies without cents. There are no fractions to drift.</dd></div>
-          <div><dt>Fair rounding</dt><dd>When a split does not divide evenly, the spare cents go to the shares that were cut the most. The parts always add up to the bill.</dd></div>
-          <div><dt>Checked at every step</dt><dd>After each step the page checks that every person still owes or gets exactly what they did before, and says so under the graph.</dd></div>
-          <div><dt>Dated rates</dt><dd>A bill in another currency shows its rate, the date of that rate and where it came from. Rates stay as they are until someone presses UPDATE RATES, so everyone with the link sees the same numbers.</dd></div>
-          <div><dt>No guessing</dt><dd>A line that can be read two ways is marked FIX, with what to change. It is never added as a guess.</dd></div>
-        </dl>
-      </div>
-    </div>
-
-    <div class="block">
-      <div class="block__col">
-        <h2 class="title">Where your data goes</h2>
-        <p>Your groups are saved in this browser. To share one, press SHARE: the whole group is packed into the link itself. Nothing is uploaded, and there are no accounts.</p>
-        <p>If someone sends you a link to a group you already have and theirs is different, you choose which version to keep. Yours is never replaced without asking.</p>
-        <p>The page loads no fonts, no pictures and no trackers. The only outside request is for exchange rates, at most once a day. <a href="https://www.exchangerate-api.com" rel="noopener">Rates by Exchange Rate API</a>.</p>
-      </div>
-    </div>
-
-  </section>
-
 </main>
 
 <footer class="foot">
@@ -261,7 +212,7 @@
           <li><a href="#bills">Bills</a></li>
           <li><a href="#graph">Graph</a></li>
           <li><a href="#settle">Settle up</a></li>
-          <li><a href="#method">Method</a></li>
+          <li><a href="./method.html">Method</a></li>
         </ul>
       </div>
       <div>

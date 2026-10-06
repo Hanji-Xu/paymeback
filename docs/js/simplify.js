@@ -449,12 +449,11 @@ function billBalances(comps) {
 
 function closingStep(run, any, rawCount, ok) {
   const n = edgesOf(run.g).length;
-  const title = n ? n + (n === 1 ? ' payment settles everything' : ' payments settle everything') : any ? 'Everyone is even' : 'No bills yet';
+  const title = any ? 'Settled' : 'No bills yet';
+  const debts = rawCount === 1 ? '1 debt' : rawCount + ' debts';
+  const payments = n === 0 ? 'nothing to pay' : n === 1 ? '1 payment' : n + ' payments';
   const text = !any ? (run.order.length ? 'Add a bill to see the graph.' : 'Add people and a bill to see the graph.')
-    : 'After adding up the bills there ' + (rawCount === 1 ? 'was 1 debt' : 'were ' + rawCount + ' separate debts') +
-      '. Now ' + (n || 'no') + ' payment' + (n === 1 ? ' covers' : 's cover') + ' all of it. ' +
-      (ok ? 'Every person still ends up paying or receiving exactly what their bills say: what they paid minus their share.'
-        : 'Warning: balances drifted, please report this group.');
+    : ok ? debts + ' became ' + payments + '.' : 'Warning: balances drifted, please report this group.';
   run.push(6, title, text, {}, []);
 }
 

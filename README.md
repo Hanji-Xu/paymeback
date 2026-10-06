@@ -157,6 +157,7 @@ The choices that keep it small and quiet:
 ```
 docs/                 the published site
   index.html          the page: every section and all fixed text
+  method.html         how the simplifying works, what accurate means, where the data goes
   css/style.css       all styles
   js/core.js          money in whole cents, currencies, rates, the math of one bill
   js/simplify.js      the steps that shrink the debts, and where each amount comes from

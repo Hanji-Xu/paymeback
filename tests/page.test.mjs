@@ -30,7 +30,7 @@ const scripts = [...modules, 'sw.js'];
 const unescape = s => s.replace(/&#10;/g, '\n').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
 test('the published folder holds the page, one stylesheet, the modules and the offline worker, and nothing else', () => {
-  assert.deepEqual(names.slice().sort(), ['.nojekyll', 'css/style.css', 'index.html', ...modules, 'sw.js'].sort());
+  assert.deepEqual(names.slice().sort(), ['.nojekyll', 'css/style.css', 'index.html', 'method.html', ...modules, 'sw.js'].sort());
   assert.deepEqual(modules.slice().sort(), ['app', 'core', 'editor', 'graph', 'parse', 'share', 'simplify', 'stage', 'store'].map(n => `js/${n}.js`));
 });
 

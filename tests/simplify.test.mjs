@@ -172,13 +172,12 @@ test('one bill between two people: every phase says there is nothing to do', () 
   const fewest = buildSteps(group, 'fewest', US);
   assert.deepEqual(phasesOf(fewest), [0, 1, 2, 3, 4, 5, 6]);
   assert.deepEqual(titlesOf(fewest), ['How to read this graph', 'Ben owes Ana · $30.00', 'No back-and-forth debts', 'No loops', 'No middlemen',
-    'No swaps needed', '1 payment settles everything']);
+    'No swaps needed', 'Settled']);
   assert.equal(plainText(fewest[1].text), 'Ben owes Ana cost $30.00. Ana paid. Split equally between Ben ($30.00 each). New debts: Ben owes Ana $30.00.');
   assert.deepEqual(fewest[1].hl, { edges: [['p-ben', 'p-ana']], kind: 'add', bill: 'Ben owes Ana' });
   assert.deepEqual([...fewest[1].people], ['p-ben', 'p-ana']);
   assert.equal(plainText(fewest[4].text), 'Nobody is both owed money and owing money, so no one is passing money along.');
-  assert.equal(lastOf(fewest).text, 'After adding up the bills there was 1 debt. Now 1 payment covers all of it. ' +
-    'Every person still ends up paying or receiving exactly what their bills say: what they paid minus their share.');
+  assert.equal(lastOf(fewest).text, '1 debt became 1 payment.');
   fewest.slice(1).forEach(s => assert.deepEqual(graphOf(s), { 'p-ben>p-ana': 3000 }));
   assert.deepEqual([fewest.rawCount, fewest.ok, fewest.maxV], [1, true, 3000]);
   assert.deepEqual(fewest.order, ['p-ana', 'p-ben']);
@@ -205,15 +204,16 @@ test('debts in both directions cancel, and the arrow remembers it', () => {
       pieces: [{ amount: 2000, bill: 'e-1', debtor: 'p-ana', creditor: 'p-ben', via: [], redirects: [] }],
       notes: [{ kind: 'net', amount: 1000, other: 'p-ben', bills: ['e-2'] }] });
     assert.equal(steps.rawCount, 2);
-    assert.equal(lastOf(steps).title, '1 payment settles everything');
+    assert.equal(lastOf(steps).title, 'Settled');
+    assert.equal(lastOf(steps).text, '2 debts became 1 payment.');
   }
 });
 
 test('equal debts in both directions leave everyone even', () => {
   const steps = buildSteps(tiny(['Ana', 'Ben'], [owes('Ana', 'Ben', 10), owes('Ben', 'Ana', 10)]), 'fewest', US);
   assert.match(steps[3].text, /comes off both: they are even\.$/);
-  assert.equal(lastOf(steps).title, 'Everyone is even');
-  assert.match(lastOf(steps).text, /^After adding up the bills there were 2 separate debts\. Now no payments cover all of it\. /);
+  assert.equal(lastOf(steps).title, 'Settled');
+  assert.equal(lastOf(steps).text, '2 debts became nothing to pay.');
   assert.equal(lastOf(steps).g.size, 0);
   assert.deepEqual(finalPayments(steps), []);
   assert.deepEqual(personBreakdown(steps, tiny(['Ana', 'Ben'], [owes('Ana', 'Ben', 10), owes('Ben', 'Ana', 10)]), 'p-ana').plan, []);
@@ -309,7 +309,7 @@ test('the example group settles with exactly what the bills say', () => {
   // In the order the arrows sit on the final graph, which is the order the earlier app produced too.
   assert.deepEqual(edgesOf(lastOf(fewest).g), [['p-dee', 'p-ana', 12300], ['p-ben', 'p-eli', 10410], ['p-cy', 'p-eli', 6909], ['p-dee', 'p-eli', 11273]]);
   assert.deepEqual(finalPayments(fewest), [['p-ben', 'p-eli', 10410], ['p-cy', 'p-eli', 6909], ['p-dee', 'p-ana', 12300], ['p-dee', 'p-eli', 11273]]);
-  assert.equal(lastOf(fewest).title, '4 payments settle everything');
+  assert.equal(lastOf(fewest).title, 'Settled');
   assert.deepEqual([fewest.rawCount, fewest.ok], [19, true]);
 
   const keep = buildSteps(EXAMPLE_GROUP, 'keep', US);
@@ -335,7 +335,7 @@ test('the example group plays through the expected steps', () => {
     'Ana and Ben cancel out', 'Ana and Cy cancel out', 'Ana and Dee cancel out', 'Ana and Eli cancel out', 'Ben and Cy cancel out', 'Ben and Dee cancel out',
     'Ben and Eli cancel out', 'Cy and Dee cancel out', 'Dee and Eli cancel out',
     'A loop of 3', 'Skip Cy as the middle', 'Skip Ana as the middle', 'Skip Ben as the middle', 'Swap who pays whom', 'Swap who pays whom',
-    '4 payments settle everything']);
+    'Settled']);
   assert.deepEqual(phasesOf(steps), [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4, 4, 5, 5, 6]);
   assert.equal(plainText(steps[2].text), 'Groceries cost €210.00 (about $236.28 at 1 EUR = 1.12513 USD, built-in rate from Oct 4, 2026). Cy paid. ' +
     'Split by shares: Ana 1, Ben 1, Cy 1 and Dee 2. Cy covers their own share. New debts: Ana owes Cy $47.26, Ben owes Cy $47.26 and Dee owes Cy $94.51.');
@@ -354,12 +354,11 @@ test('the example group plays through the expected steps', () => {
   assert.match(plainText(steps[1].text), /New debts: .* and Dee owes Ben \$58\.50, plus 2 more\.$/);
 });
 
-test('the closing step says "what their bills say", and that is checked on every run', () => {
+test('the closing step counts the debts and the payments, and only says so when the balances check out', () => {
   // Two bills of the example have two payers each. Those are shared out to the cent as well.
-  assert.match(lastOf(buildSteps(EXAMPLE_GROUP, 'fewest', US)).text,
-    /Now 4 payments cover all of it\. Every person still ends up paying or receiving exactly what their bills say: what they paid minus their share\.$/);
+  assert.equal(lastOf(buildSteps(EXAMPLE_GROUP, 'fewest', US)).text, '19 debts became 4 payments.');
   const onePayerEach = tiny(['Ana', 'Ben', 'Cy'], [owes('Ana', 'Ben', 10), owes('Ben', 'Cy', 7.5)]);
-  assert.match(lastOf(buildSteps(onePayerEach, 'keep', US)).text, /exactly what their bills say: what they paid minus their share\.$/);
+  assert.equal(lastOf(buildSteps(onePayerEach, 'keep', US)).text, '2 debts became 2 payments.');
 });
 
 test('a payment in another currency says both amounts', () => {
@@ -719,7 +718,7 @@ function assertSameSteps(mine, theirs, label, compare) {
     assertSame(a.P, b.P, at + ': where the money came from');
     assertSame(a.hl, b.hl, at + ': highlight');
     assertSame(a.people, b.people, at + ': people');
-    if (compare.titles(a)) assert.equal(a.title, b.title, at + ': title');
+    if (compare.titles(a) && a.phase !== 6) assert.equal(a.title, b.title, at + ': title');
     // The sentences for bills and for the closing step were reworded on purpose; the rest must be identical.
     if (compare.texts && a.phase >= 2 && a.phase <= 5) assert.equal(a.text, b.text, at + ': text');
   });

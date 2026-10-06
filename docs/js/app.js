@@ -171,7 +171,7 @@ function renderHeader() {
 
 // Bolds the nav link of the section that crosses a line two fifths down the window.
 function watchSections() {
-  const links = new Map([...$('nav').querySelectorAll('a')].map(a => [a.hash.slice(1), a]));
+  const links = new Map([...$('nav').querySelectorAll('a')].filter(a => a.hash).map(a => [a.hash.slice(1), a]));
   const on = new Set();
   const watcher = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) on.add(e.target.id); else on.delete(e.target.id); });
